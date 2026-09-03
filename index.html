@@ -4,8 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบเบิกจ่าย PPE</title>
+<style>
+  html,body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+  }
+  #ppeFrame{
+    position:fixed; inset:0; width:100%; height:100%; border:0;
+  }
+</style>
 </head>
 <body>
+  <iframe id="ppeFrame" title="ระบบเบิกจ่าย PPE"></iframe>
+
 <script>
   // ***** แก้ตรงนี้ทุกครั้งที่ deploy Apps Script เวอร์ชันใหม่แล้วได้ URL /exec เปลี่ยน *****
   var WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwyxLgCQPpzJCHWigiWH76cW_KSf-IJZ00xcl0iU8bHdQ2k9CKv9I6KWfWUXpPI4CJ1/exec";
@@ -15,10 +25,19 @@
 
   var target = WEBAPP_URL + (key ? ('?key=' + encodeURIComponent(key)) : '');
 
-  // เด้งไปหน้าแอปทันที ไม่มีหน้า loading คั่นอีกต่อไป
-  // (หน้านี้ถูกเปิดด้วยเบราว์เซอร์ภายนอกอยู่แล้วผ่าน openExternalBrowser=1 จากลิงก์ Telegram
-  //  จึงไม่จำเป็นต้องมี fallback สำหรับปัญหา in-app browser เหมือน iframe แบบเดิมอีกแล้ว)
-  window.location.replace(target);
+  var frameEl = document.getElementById('ppeFrame');
+  var loaded = false;
+  frameEl.addEventListener('load', function(){ loaded = true; });
+
+  // ฝัง iframe ตรงๆ ตั้งแต่แรก ไม่มีหน้าจอ "กำลังเปิดระบบเบิกจ่าย PPE..." คั่นอีกต่อไป
+  // ยูอาร์แอลบนแถบที่อยู่จะยังเป็น qtcsafety.github.io เหมือนเดิม (ไม่เด้งไป script.google.com)
+  frameEl.src = target;
+
+  // สำรอง: เผื่อกรณีฝัง iframe ไม่สำเร็จ (เช่นถูกบล็อก หรือเน็ตช้ามาก) ถ้าผ่านไปนานแล้วยังโหลดไม่เสร็จ
+  // ค่อยเปลี่ยนไปเปิดตรงแทน (จะเห็น URL เปลี่ยนไปเป็น script.google.com เฉพาะกรณีนี้เท่านั้น)
+  setTimeout(function(){
+    if(!loaded){ window.location.replace(target); }
+  }, 8000);
 </script>
 </body>
 </html>
