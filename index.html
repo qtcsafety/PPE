@@ -4,39 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบเบิกจ่าย PPE</title>
-<style>
-  html,body{
-    margin:0; padding:0; height:100%; overflow:hidden;
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Sarabun,sans-serif;
-    background:#f4faf8;
-  }
-  #loading{
-    position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:#f4faf8; z-index:2; transition:opacity .25s ease;
-  }
-  .spinner{
-    width:40px; height:40px; border:4px solid #d7f0e6; border-top-color:#3fb28f;
-    border-radius:50%; margin:0 auto 16px; animation:spin .8s linear infinite;
-  }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
-  #loading p{ font-size:14px; color:#666; margin:4px 0; }
-  #loading a{ color:#3fb28f; }
-  #ppeFrame{
-    position:fixed; inset:0; width:100%; height:100%; border:0; z-index:1;
-  }
-</style>
 </head>
 <body>
-  <div id="loading">
-    <div class="spinner"></div>
-    <p>กำลังเปิดระบบเบิกจ่าย PPE...</p>
-    <p id="fallback" style="display:none;">
-      ถ้าหน้าไม่เปิด <a id="fallbackLink" href="#" target="_blank" rel="noopener">กดที่นี่เพื่อเปิดโดยตรง</a>
-    </p>
-  </div>
-
-  <iframe id="ppeFrame" title="ระบบเบิกจ่าย PPE"></iframe>
-
 <script>
   // ***** แก้ตรงนี้ทุกครั้งที่ deploy Apps Script เวอร์ชันใหม่แล้วได้ URL /exec เปลี่ยน *****
   var WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwyxLgCQPpzJCHWigiWH76cW_KSf-IJZ00xcl0iU8bHdQ2k9CKv9I6KWfWUXpPI4CJ1/exec";
@@ -46,27 +15,10 @@
 
   var target = WEBAPP_URL + (key ? ('?key=' + encodeURIComponent(key)) : '');
 
-  var loadingEl = document.getElementById('loading');
-  var frameEl = document.getElementById('ppeFrame');
-
-  document.getElementById('fallbackLink').href = target;
-  document.getElementById('fallback').style.display = 'block';
-
-  // กันกรณีโหลดช้าหรือฝัง iframe ไม่สำเร็จ (เช่นเน็ตช้า) - ซ่อน loading เมื่อ iframe โหลดเสร็จ
-  frameEl.addEventListener('load', function(){
-    loadingEl.style.opacity = '0';
-    setTimeout(function(){ loadingEl.style.display = 'none'; }, 250);
-  });
-
-  // ตั้ง src หลังผูก event ไว้แล้ว เพื่อไม่ให้พลาด event load
-  frameEl.src = target;
-
-  // สำรอง: ถ้าผ่านไปนานแล้วยังโหลดไม่เสร็จ (เช่นถูกบล็อกฝัง iframe) ให้เปลี่ยนไปเปิดตรงแทน
-  setTimeout(function(){
-    if(loadingEl.style.display !== 'none'){
-      window.location.replace(target);
-    }
-  }, 8000);
+  // เด้งไปหน้าแอปทันที ไม่มีหน้า loading คั่นอีกต่อไป
+  // (หน้านี้ถูกเปิดด้วยเบราว์เซอร์ภายนอกอยู่แล้วผ่าน openExternalBrowser=1 จากลิงก์ Telegram
+  //  จึงไม่จำเป็นต้องมี fallback สำหรับปัญหา in-app browser เหมือน iframe แบบเดิมอีกแล้ว)
+  window.location.replace(target);
 </script>
 </body>
 </html>
